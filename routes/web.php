@@ -1,18 +1,20 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
+// LANDING + LOGIN PAGE
+Route::get('/', [AuthController::class, 'loginPage'])->name('login');
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// LOGIN PROCESS
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+
+// REGISTER PROCESS (MASYARAKAT ONLY)
+Route::post('/register', [AuthController::class, 'register'])->name('register.post');
+
+// LOGOUT
+Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// DASHBOARD PETUGAS / ADMIN (HARUS LOGIN)
+    Route::get('/dashboard/petugas', [AuthController::class, 'dashboardPetugas'])->name('dashboard.petugas');
+    Route::get('/dashboard/masyarakat', [AuthController::class, 'dashboardMasyarakat'])->name('dashboard.masyarakat');

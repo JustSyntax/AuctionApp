@@ -9,6 +9,7 @@ return new class extends Migration {
     {
         Schema::create('tb_masyarakat', function (Blueprint $table) {
             $table->increments('id_user');
+            $table->string('nik', 16)->unique();
             $table->string('nama_lengkap', 25);
             $table->string('username', 25)->unique();
             $table->string('password', 255);
