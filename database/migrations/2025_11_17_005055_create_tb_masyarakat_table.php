@@ -14,6 +14,7 @@ return new class extends Migration {
             $table->string('username', 25)->unique();
             $table->string('password', 255);
             $table->string('telp', 25);
+            $table->text('alamat')->nullable();
             $table->enum('status', ['aktif', 'diblokir'])->default('aktif');
             $table->timestamps();
         });

@@ -1,4 +1,4 @@
-@extends('petugas.layouts.app')
+@extends('layouts.app')
 
 @section('title', 'Dashboard Petugas')
 @section('page-title', 'Dashboard')
