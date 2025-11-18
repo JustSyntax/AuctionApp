@@ -3,7 +3,11 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BarangController;
-use App\Http\Controllers\MasyarakatController; // <-- Jangan lupa import ini
+use App\Http\Controllers\MasyarakatController;
+use App\Http\Controllers\PetugasController;
+use App\Http\Controllers\LelangController;
+use App\Http\Controllers\HistoryController; // <-- 1. WAJIB IMPORT INI
+use App\Http\Controllers\PenawaranController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,26 +22,39 @@ Route::post('/register', [AuthController::class, 'register'])->name('register.po
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
 
-// --- DASHBOARD ROUTES ---
-// (Akses dicek di Controller atau Middleware RoleMiddleware jika nanti dipasang)
-Route::get('/dashboard/petugas', [AuthController::class, 'dashboardPetugas'])->name('dashboard.petugas');
-Route::get('/dashboard/masyarakat', [AuthController::class, 'dashboardMasyarakat'])->name('dashboard.masyarakat');
+// --- HALAMAN YANG HARUS LOGIN (SEMUA ROLE) ---
+// Menggunakan middleware 'auth.session' yang baru kita buat
+Route::middleware(['auth.session'])->group(function () {
+    
+    // DASHBOARD
+    Route::get('/dashboard/petugas', [AuthController::class, 'dashboardPetugas'])->name('dashboard.petugas');
+    Route::get('/dashboard/masyarakat', [AuthController::class, 'dashboardMasyarakat'])->name('dashboard.masyarakat');
+
+    // 2. ROUTE HISTORY (BARU)
+    Route::get('/history', [HistoryController::class, 'index'])->name('history.index');
+    Route::get('/penawaran', [PenawaranController::class, 'index'])->name('penawaran.index');
+    Route::get('/penawaran/{id}', [PenawaranController::class, 'show'])->name('penawaran.show');
+    Route::post('/penawaran/{id}/bid', [PenawaranController::class, 'store'])->name('penawaran.store');
+
+});
 
 
 // --- MASTER DATA (ADMIN & PETUGAS ONLY) ---
-// Semua route di dalam sini otomatis kena middleware 'auth.adminpetugas'
 Route::middleware(['auth.adminpetugas'])->group(function () {
 
     // 1. DATA BARANG
     Route::resource('barang', BarangController::class)->except(['show']);
 
     // 2. DATA MASYARAKAT
-    // Route khusus Toggle Status (Harus didefinisikan SEBELUM resource)
     Route::patch('/masyarakat/{id}/toggle-status', [MasyarakatController::class, 'toggleStatus'])
         ->name('masyarakat.toggleStatus');
-        
-    // Resource default (index, create, store, edit, update, destroy)
     Route::resource('masyarakat', MasyarakatController::class);
-    Route::resource('petugas', App\Http\Controllers\PetugasController::class)->except(['show']);
+    
+    // 3. DATA PETUGAS
+    Route::resource('petugas', PetugasController::class)->except(['show']);
+
+    // 4. DATA LELANG
+    Route::patch('/lelang/{id}/tutup', [LelangController::class, 'update'])->name('lelang.tutup');
+    Route::resource('lelang', LelangController::class)->except(['edit', 'update']); // Show diizinkan
 
 });

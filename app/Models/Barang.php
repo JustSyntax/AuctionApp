@@ -36,6 +36,10 @@ class Barang extends Model
         'gambar',
     ];
 
+    public function lelang()
+    {
+        return $this->hasOne(Lelang::class, 'id_barang', 'id_barang');
+    }
     /**
      * Mengubah format 'tgl' menjadi Carbon instance
      *

@@ -39,15 +39,15 @@
             border-right: 1px solid #333;
         }
 
-        /* LOGO FIX */
+        /* LOGO */
         .brand-logo {
-            font-size: 20px; /* Ukuran dipaskan biar ga bablas */
+            font-size: 20px;
             font-weight: 800;
             color: white;
             margin-bottom: 30px;
             display: flex;
             align-items: center;
-            white-space: nowrap; /* Mencegah teks turun baris */
+            white-space: nowrap;
         }
         .brand-logo i {
             font-size: 24px;
@@ -61,7 +61,7 @@
             overflow-y: auto; /* Scroll jika menu kepanjangan */
             scrollbar-width: none; /* Hide scrollbar Firefox */
         }
-        .nav-wrapper::-webkit-scrollbar { display: none; /* Hide scrollbar Chrome */ }
+        .nav-wrapper::-webkit-scrollbar { display: none; }
 
         .menu-label {
             font-size: 11px;
@@ -186,7 +186,7 @@
         }
         .page-header p { color: #666; font-size: 14px; }
         
-        /* -- Style Tambahan (bisa dipindah ke push('styles') ) -- */
+        /* Card Style Global */
         .card {
             border: none;
             border-radius: 12px;
@@ -199,7 +199,25 @@
         .card-body {
             padding: 25px;
         }
+
+        /* --- DROPDOWN FIX --- */
+        .nav-link:focus { box-shadow: none; }
         
+        /* Saat Dropdown TERBUKA (Expanded) */
+        .nav-link[aria-expanded="true"] {
+            color: #ffffff !important;
+            background-color: rgba(255,255,255, 0.05);
+        }
+
+        /* Saat Dropdown TERTUTUP (Collapsed) */
+        .nav-link.collapsed {
+            color: var(--text-sidebar);
+            background-color: transparent;
+        }
+
+        /* Animasi Panah */
+        .nav-link .bi-chevron-down { transition: transform 0.3s ease; }
+        .nav-link[aria-expanded="true"] .bi-chevron-down { transform: rotate(180deg); }
     </style>
     
     @stack('styles')
@@ -207,19 +225,15 @@
 </head>
 <body>
 
-<!-- SIDEBAR -->
 <nav class="sidebar">
     
-    <!-- 1. LOGO -->
     <div class="brand-logo">
         <i class="bi bi-car-front-fill"></i>
         DRIVE AUCTION
     </div>
 
-    <!-- 2. MENU (Dibungkus nav-wrapper biar bisa discroll dan push footer ke bawah) -->
     <div class="nav-wrapper">
         
-        <!-- MENU UMUM -->
         @php
             $dashboardRoute = session('role') == 'masyarakat' ? route('dashboard.masyarakat') : route('dashboard.petugas');
         @endphp
@@ -227,20 +241,27 @@
             <span><i class="bi bi-grid-fill icon-left"></i> Overview</span>
         </a>
 
-        <!-- MENU MASYARAKAT -->
         @if(session('role') == 'masyarakat')
             <div class="menu-label">Menu</div>
-            <a href="#" class="nav-link {{ request()->routeIs('penawaran.*') ? 'active' : '' }}">
+            
+            {{-- 1. Link PENAWARAN (FIXED) --}}
+            <a href="{{ route('penawaran.index') }}" class="nav-link {{ request()->routeIs('penawaran.*') ? 'active' : '' }}">
                 <span><i class="bi bi-tag-fill icon-left"></i> Penawaran</span>
+            </a>
+            
+            {{-- 2. Link HISTORY --}}
+            <a href="{{ route('history.index') }}" class="nav-link {{ request()->routeIs('history.index') ? 'active' : '' }}">
+                <span><i class="bi bi-clock-history icon-left"></i> Riwayat Saya</span>
             </a>
         @endif
 
-        <!-- MENU ADMIN & PETUGAS -->
+
         @if(session('role') == 'administrator' || session('role') == 'petugas')
             <div class="menu-label">Management</div>
 
-            <!-- Master Data Dropdown -->
-            <a class="nav-link collapsed" data-bs-toggle="collapse" href="#masterData" role="button">
+            <a class="nav-link collapsed" data-bs-toggle="collapse" 
+               href="#masterData" role="button"
+               aria-expanded="{{ request()->routeIs('petugas.*','masyarakat.*','barang.*') ? 'true' : 'false' }}">
                 <span><i class="bi bi-database-fill icon-left"></i> Master Data</span>
                 <i class="bi bi-chevron-down small" style="font-size: 10px;"></i>
             </a>
@@ -250,37 +271,34 @@
                         <a href="{{ route('petugas.index') }}" class="sub-link {{ request()->routeIs('petugas.*') ? 'active' : '' }}">Data Petugas</a>
                         <a href="{{ route('masyarakat.index') }}" class="sub-link {{ request()->routeIs('masyarakat.*') ? 'active' : '' }}">Data Masyarakat</a>
                     @endif
-                    
-                    <!-- INI YANG DIUBAH -->
                     <a href="{{ route('barang.index') }}" class="sub-link {{ request()->routeIs('barang.*') ? 'active' : '' }}">Data Barang</a>
-                    
                 </div>
             </div>
 
-            <!-- Lelang Dropdown (Petugas Only) -->
             @if(session('role') == 'petugas')
-            <a class="nav-link collapsed mt-1" data-bs-toggle="collapse" href="#lelangMenu" role="button">
+            <a class="nav-link collapsed mt-1" data-bs-toggle="collapse" 
+               href="#lelangMenu" role="button"
+               aria-expanded="{{ request()->routeIs('lelang.*', 'history.index') ? 'true' : 'false' }}">
                 <span><i class="bi bi-hammer icon-left"></i> Lelang</span>
                 <i class="bi bi-chevron-down small" style="font-size: 10px;"></i>
             </a>
-            <div class="collapse {{ request()->routeIs('lelang.*') ? 'show' : '' }}" id="lelangMenu">
+            <div class="collapse {{ request()->routeIs('lelang.*', 'history.index') ? 'show' : '' }}" id="lelangMenu">
                 <div class="collapse-inner">
-                    <a href="#" class="sub-link">Buka Lelang</a>
-                    <a href="#" class="sub-link">Riwayat Lelang</a>
+                    <a href="{{ route('lelang.index') }}" class="sub-link {{ request()->routeIs('lelang.*') ? 'active' : '' }}">Kelola Lelang</a>
+                    <a href="{{ route('history.index') }}" class="sub-link {{ request()->routeIs('history.index') ? 'active' : '' }}">
+                        History Lelang
+                    </a>
                 </div>
             </div>
             @endif
 
-            <!-- Laporan -->
             <a href="#" class="nav-link mt-1 {{ request()->routeIs('laporan.*') ? 'active' : '' }}">
                 <span><i class="bi bi-file-earmark-text-fill icon-left"></i> Laporan</span>
             </a>
         @endif
     </div>
 
-    <!-- 3. FOOTER (User & Logout) -->
     <div class="sidebar-footer">
-        <!-- User Profile -->
         <div class="user-profile">
             <div class="avatar">
                 {{ substr(session('name'), 0, 1) }}
@@ -291,7 +309,6 @@
             </div>
         </div>
         
-        <!-- Logout Button -->
         <a href="{{ route('logout') }}" class="btn-logout">
             <i class="bi bi-box-arrow-left me-1"></i> Logout
         </a>
@@ -299,9 +316,7 @@
 
 </nav>
 
-<!-- MAIN CONTENT -->
 <div class="main-wrapper">
-    <!-- Karena topbar dihapus, kita sediakan area judul disini agar content tidak polosan -->
     <div class="page-header">
         <h2>@yield('page-title', 'Dashboard')</h2>
         <p class="mb-0">Selamat datang kembali di panel {{ session('role') }}.</p>
