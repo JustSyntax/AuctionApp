@@ -10,10 +10,18 @@ use Illuminate\Support\Facades\Auth;
 class PenawaranController extends Controller
 {
     // Tampilkan daftar lelang yang sedang DIBUKA
-    public function index()
+    public function index(Request $request) // Tambah Request
     {
+        $search = $request->input('search');
+
         $lelangs = Lelang::with(['barang', 'pemenang.masyarakat'])
             ->where('status', 'dibuka')
+            // FILTER SEARCH
+            ->when($search, function($query, $search) {
+                return $query->whereHas('barang', function($q) use ($search) {
+                    $q->where('nama_barang', 'like', "%{$search}%");
+                });
+            })
             ->orderBy('created_at', 'desc')
             ->get();
 

@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Barang;
+use App\Models\HistoryLelang;
+use App\Models\Lelang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -117,15 +120,77 @@ class AuthController extends Controller
         session()->flush();
         return redirect()->route('login');
     }
+    
 
     // DASHBOARD VIEWS
     public function dashboardPetugas()
     {
-        return view('petugas.dashboard');
+        $role = session('role');
+        $userId = session('user_id');
+        
+        $data = [];
+
+        // === LOGIC UNTUK ADMINISTRATOR ===
+        if ($role == 'administrator') {
+            // 1. Statistik Umum
+            $data['total_petugas'] = Petugas::count();
+            $data['total_masyarakat'] = Masyarakat::count();
+            $data['total_barang'] = Barang::count();
+            
+            // 2. Total Pendapatan Keseluruhan
+            $data['total_pendapatan'] = Lelang::where('status', 'ditutup')->sum('harga_akhir');
+
+            // 3. LEADERBOARD PETUGAS (Siapa yg paling rajin nutup lelang)
+            // Kita hitung jumlah lelang status 'ditutup' per petugas
+            $data['top_petugas'] = Petugas::withCount(['lelang' => function ($query) {
+                    $query->where('status', 'ditutup');
+                }])
+                ->whereHas('level', function($q) {
+                    $q->where('level', 'petugas'); // Hanya ambil user level petugas
+                })
+                ->orderBy('lelang_count', 'desc') // Urutkan dari yg terbanyak
+                ->limit(5) // Ambil top 5
+                ->get();
+        } 
+        
+        // === LOGIC UNTUK PETUGAS BIASA ===
+        else {
+            // 1. Statistik Pribadi
+            $data['lelang_dibuka'] = Lelang::where('id_petugas', $userId)->where('status', 'dibuka')->count();
+            $data['lelang_ditutup'] = Lelang::where('id_petugas', $userId)->where('status', 'ditutup')->count();
+            
+            // 2. Pendapatan yang dihasilkan Petugas ini
+            $data['pendapatan_saya'] = Lelang::where('id_petugas', $userId)
+                                             ->where('status', 'ditutup')
+                                             ->sum('harga_akhir');
+        }
+
+        return view('petugas.dashboard', compact('data', 'role'));
     }
 
     public function dashboardMasyarakat()
     {
-        return view('masyarakat.dashboard');
+        $userId = session('user_id');
+        $data = [];
+
+        // 1. Total Partisipasi (Berapa kali nge-bid)
+        $data['total_bids'] = HistoryLelang::where('id_user', $userId)->count();
+
+        // 2. Barang Diikuti (Jumlah barang unik yang pernah ditawar)
+        $data['items_joined'] = HistoryLelang::where('id_user', $userId)->distinct('id_lelang')->count('id_lelang');
+
+        // 3. Lelang Dimenangkan
+        // Ambil semua lelang ditutup, lalu filter di PHP (karena relasi pemenang agak kompleks di query builder murni)
+        $lelangTutup = Lelang::with('pemenang')->where('status', 'ditutup')->get();
+        $data['won_count'] = $lelangTutup->filter(function($lelang) use ($userId) {
+            return $lelang->pemenang && $lelang->pemenang->id_user == $userId;
+        })->count();
+
+        // 4. Total Pengeluaran (Total harga barang yang dimenangkan)
+        $data['total_spent'] = $lelangTutup->filter(function($lelang) use ($userId) {
+            return $lelang->pemenang && $lelang->pemenang->id_user == $userId;
+        })->sum('harga_akhir');
+
+        return view('masyarakat.dashboard', compact('data'));
     }
 }

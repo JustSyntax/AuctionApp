@@ -5,14 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Drive Auction')</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    {{-- 1. CSS BOOTSTRAP (LOKAL) --}}
+    <link href="{{ asset('assets/css/bootstrap.min.css') }}" rel="stylesheet">
+    
+    {{-- 2. ICON BOOTSTRAP (LOKAL) --}}
+    <link href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
+    
+    {{-- 3. FONT MONTSERRAT (LOKAL - Ganti Link Google Font) --}}
+    <link href="{{ asset('assets/css/montserrat.css') }}" rel="stylesheet">
 
     <style>
         :root {
-            --bg-body: #f4f6f8;       /* Background Konten Putih/Abu Soft */
-            --bg-sidebar: #111111;    /* Sidebar Hitam */
+            --bg-body: #f4f6f8;       
+            --bg-sidebar: #111111;    
             --primary: #2a53ff;       
             --text-sidebar: #a0a0a0;
             --text-sidebar-hover: #ffffff;
@@ -28,13 +33,13 @@
         /* === SIDEBAR === */
         .sidebar {
             width: 260px;
-            height: 100vh; /* Wajib full height */
+            height: 100vh; 
             background-color: var(--bg-sidebar);
             position: fixed;
             top: 0; left: 0;
             padding: 25px 20px;
-            display: flex;        /* Aktifkan Flexbox */
-            flex-direction: column; /* Susun ke bawah */
+            display: flex;        
+            flex-direction: column; 
             z-index: 1000;
             border-right: 1px solid #333;
         }
@@ -55,11 +60,11 @@
             color: var(--primary);
         }
 
-        /* MENU CONTAINER (Agar Footer Terndorong ke Bawah) */
+        /* MENU WRAPPER */
         .nav-wrapper {
-            flex-grow: 1;    /* Kunci: Mengambil sisa ruang kosong */
-            overflow-y: auto; /* Scroll jika menu kepanjangan */
-            scrollbar-width: none; /* Hide scrollbar Firefox */
+            flex-grow: 1;    
+            overflow-y: auto; 
+            scrollbar-width: none; 
         }
         .nav-wrapper::-webkit-scrollbar { display: none; }
 
@@ -123,12 +128,12 @@
         .sub-link:hover { color: white; padding-left: 18px; }
         .sub-link.active { color: white; font-weight: 600; }
 
-        /* FOOTER USER (Fixed at Bottom) */
+        /* FOOTER USER */
         .sidebar-footer {
             margin-top: 20px;
             padding-top: 20px;
             border-top: 1px solid #222;
-            flex-shrink: 0; /* Jangan menyusut */
+            flex-shrink: 0; 
         }
 
         .user-profile {
@@ -171,51 +176,31 @@
         /* === MAIN CONTENT === */
         .main-wrapper {
             margin-left: 260px;
-            padding: 40px; /* Padding besar karena ga ada topbar */
+            padding: 40px; 
             min-height: 100vh;
         }
         
-        /* Judul Halaman di Content Area */
-        .page-header {
-            margin-bottom: 30px;
-        }
-        .page-header h2 {
-            font-weight: 700;
-            color: #1a1a1a;
-            margin-bottom: 5px;
-        }
+        .page-header { margin-bottom: 30px; }
+        .page-header h2 { font-weight: 700; color: #1a1a1a; margin-bottom: 5px; }
         .page-header p { color: #666; font-size: 14px; }
         
-        /* Card Style Global */
-        .card {
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-        }
-        .card-header {
-            border-bottom: 1px solid #f0f0f0;
-            padding: 20px 25px;
-        }
-        .card-body {
-            padding: 25px;
-        }
+        .card { border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
+        .card-header { border-bottom: 1px solid #f0f0f0; padding: 20px 25px; }
+        .card-body { padding: 25px; }
 
         /* --- DROPDOWN FIX --- */
         .nav-link:focus { box-shadow: none; }
         
-        /* Saat Dropdown TERBUKA (Expanded) */
         .nav-link[aria-expanded="true"] {
             color: #ffffff !important;
             background-color: rgba(255,255,255, 0.05);
         }
 
-        /* Saat Dropdown TERTUTUP (Collapsed) */
         .nav-link.collapsed {
             color: var(--text-sidebar);
             background-color: transparent;
         }
 
-        /* Animasi Panah */
         .nav-link .bi-chevron-down { transition: transform 0.3s ease; }
         .nav-link[aria-expanded="true"] .bi-chevron-down { transform: rotate(180deg); }
     </style>
@@ -244,12 +229,10 @@
         @if(session('role') == 'masyarakat')
             <div class="menu-label">Menu</div>
             
-            {{-- 1. Link PENAWARAN (FIXED) --}}
             <a href="{{ route('penawaran.index') }}" class="nav-link {{ request()->routeIs('penawaran.*') ? 'active' : '' }}">
                 <span><i class="bi bi-tag-fill icon-left"></i> Penawaran</span>
             </a>
             
-            {{-- 2. Link HISTORY --}}
             <a href="{{ route('history.index') }}" class="nav-link {{ request()->routeIs('history.index') ? 'active' : '' }}">
                 <span><i class="bi bi-clock-history icon-left"></i> Riwayat Saya</span>
             </a>
@@ -271,6 +254,7 @@
                         <a href="{{ route('petugas.index') }}" class="sub-link {{ request()->routeIs('petugas.*') ? 'active' : '' }}">Data Petugas</a>
                         <a href="{{ route('masyarakat.index') }}" class="sub-link {{ request()->routeIs('masyarakat.*') ? 'active' : '' }}">Data Masyarakat</a>
                     @endif
+                    
                     <a href="{{ route('barang.index') }}" class="sub-link {{ request()->routeIs('barang.*') ? 'active' : '' }}">Data Barang</a>
                 </div>
             </div>
@@ -278,21 +262,22 @@
             @if(session('role') == 'petugas')
             <a class="nav-link collapsed mt-1" data-bs-toggle="collapse" 
                href="#lelangMenu" role="button"
-               aria-expanded="{{ request()->routeIs('lelang.*', 'history.index') ? 'true' : 'false' }}">
-                <span><i class="bi bi-hammer icon-left"></i> Lelang</span>
+               aria-expanded="{{ request()->routeIs('lelang.*', 'history.index') ? 'true' : 'false' }}"> <span><i class="bi bi-hammer icon-left"></i> Lelang</span>
                 <i class="bi bi-chevron-down small" style="font-size: 10px;"></i>
             </a>
+            
             <div class="collapse {{ request()->routeIs('lelang.*', 'history.index') ? 'show' : '' }}" id="lelangMenu">
                 <div class="collapse-inner">
                     <a href="{{ route('lelang.index') }}" class="sub-link {{ request()->routeIs('lelang.*') ? 'active' : '' }}">Kelola Lelang</a>
+                    
                     <a href="{{ route('history.index') }}" class="sub-link {{ request()->routeIs('history.index') ? 'active' : '' }}">
-                        History Lelang
+                        Riwayat Lelang
                     </a>
                 </div>
             </div>
             @endif
 
-            <a href="#" class="nav-link mt-1 {{ request()->routeIs('laporan.*') ? 'active' : '' }}">
+            <a href="{{ route('laporan.index') }}" class="nav-link mt-1 {{ request()->routeIs('laporan.*') ? 'active' : '' }}">
                 <span><i class="bi bi-file-earmark-text-fill icon-left"></i> Laporan</span>
             </a>
         @endif
@@ -327,7 +312,9 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{{-- 4. JS BOOTSTRAP (LOKAL - Ganti Link CDN) --}}
+<script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
+
 @stack('scripts')
 </body>
 </html>

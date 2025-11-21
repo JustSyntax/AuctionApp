@@ -49,7 +49,10 @@
             <h3 class="fw-bold">{{ $lelang->barang->nama_barang }}</h3>
             <span class="badge bg-success mb-3">OPEN BIDDING</span>
             <p class="text-muted">{{ $lelang->barang->deskripsi_barang }}</p>
-
+            <div class="d-flex align-items-center mt-3">
+                <i class="bi bi-person-workspace me-2 text-secondary"></i>
+                <small class="text-muted">Host Lelang: <strong>{{ $lelang->petugas->nama_petugas }}</strong></small>
+            </div>
             <hr>
             
             <h5 class="fw-bold mb-3"><i class="bi bi-clock-history"></i> Riwayat Penawaran</h5>
@@ -123,7 +126,8 @@
                     <div class="input-group mb-2">
                         <span class="input-group-text fw-bold">Rp</span>
                         <input type="number" name="penawaran_harga" class="form-control form-control-lg @error('penawaran_harga') is-invalid @enderror" 
-                               placeholder="Contoh: {{ $lelang->harga_akhir > 0 ? $lelang->harga_akhir + 10000 : $lelang->barang->harga_awal + 10000 }}" required>
+                               placeholder="Contoh: {{ $lelang->harga_akhir > 0 ? $lelang->harga_akhir + 10000 : $lelang->barang->harga_awal + 10000 }}" oninput="if(this.value.length > 16) this.value = this.value.slice(0, 16);"
+                                onkeypress="return event.charCode >= 48 && event.charCode <= 57" required>
                     </div>
                     @error('penawaran_harga')
                         <div class="text-danger small mb-3">{{ $message }}</div>

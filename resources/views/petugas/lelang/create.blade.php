@@ -1,10 +1,13 @@
 @extends('layouts.app')
 @section('title', 'Buka Lelang Baru')
 
-{{-- 1. Kita butuh CSS Select2 disini --}}
+{{-- 1. Load CSS Select2 Lokal --}}
 @push('styles')
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+<!-- Select2 CSS -->
+<link href="{{ asset('assets/vendor/select2/select2.min.css') }}" rel="stylesheet" />
+<!-- Select2 Bootstrap Theme -->
+<link rel="stylesheet" href="{{ asset('assets/vendor/select2/select2-bootstrap-5-theme.min.css') }}" />
+
 <style>
     /* Styling agar gambar di dropdown rapi */
     .select2-result-repository__avatar {
@@ -44,15 +47,13 @@
             @csrf
             <div class="row g-3">
                 
-                {{-- 1. PILIH BARANG (Full Width biar lega liat gambarnya) --}}
+                {{-- 1. PILIH BARANG --}}
                 <div class="col-12">
                     <label class="form-label">Pilih Barang <span class="text-danger">*</span></label>
                     
-                    {{-- Tambahkan ID biar bisa dipanggil JS --}}
                     <select name="id_barang" id="selectBarang" class="form-select" required>
                         <option value="" disabled selected>-- Cari & Pilih Barang --</option>
                         @foreach($barangs as $brg)
-                            {{-- Kita simpan URL gambar di atribut 'data-image' --}}
                             <option value="{{ $brg->id_barang }}" 
                                     data-image="{{ $brg->gambar ? asset('storage/'.$brg->gambar) : '' }}"
                                     data-price="Rp {{ number_format($brg->harga_awal, 0, ',', '.') }}">
@@ -60,7 +61,7 @@
                             </option>
                         @endforeach
                     </select>
-                    <div class="form-text">Cari nama barang yang ingin dilelang.</div>
+                    <div class="form-text">Hanya barang yang terdaftar di Master Data yang muncul.</div>
                 </div>
 
                 {{-- 2. TANGGAL LELANG --}}
@@ -69,7 +70,7 @@
                     <input type="date" name="tgl_lelang" class="form-control" value="{{ date('Y-m-d') }}" required>
                 </div>
 
-                {{-- 3. STATUS (Sesuai Request) --}}
+                {{-- 3. STATUS --}}
                 <div class="col-md-6">
                     <label class="form-label">Status Lelang</label>
                     <select name="status" class="form-select">
@@ -89,28 +90,27 @@
 </div>
 @endsection
 
-{{-- 2. Script JS untuk mengubah Dropdown biasa jadi Select2 dengan Gambar --}}
+{{-- 2. Load JS Select2 Lokal --}}
 @push('scripts')
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<!-- jQuery Lokal -->
+<script src="{{ asset('assets/js/jquery.min.js') }}"></script>
+<!-- Select2 JS Lokal -->
+<script src="{{ asset('assets/vendor/select2/select2.min.js') }}"></script>
 
 <script>
     $(document).ready(function() {
-        // Fungsi untuk memformat tampilan opsi (Gambar + Teks)
         function formatState (opt) {
-            if (!opt.id) { return opt.text; } // Untuk placeholder
+            if (!opt.id) { return opt.text; } 
 
             var optimage = $(opt.element).attr('data-image'); 
             var optprice = $(opt.element).attr('data-price'); 
             
-            // Jika ada gambar, tampilkan image tag
             if(optimage){
                 var $opt = $(
                     '<span><img src="' + optimage + '" class="select2-result-repository__avatar" /> ' + opt.text + ' - <b>' + optprice + '</b></span>'
                 );
                 return $opt;
             } else {
-                // Jika tidak ada gambar (No Image)
                 var $opt = $(
                     '<span><i class="bi bi-image me-2"></i> ' + opt.text + ' - <b>' + optprice + '</b></span>'
                 );
@@ -118,11 +118,10 @@
             }
         };
 
-        // Inisialisasi Select2 pada ID #selectBarang
         $('#selectBarang').select2({
             theme: 'bootstrap-5',
-            templateResult: formatState,    // Tampilan saat dropdown dibuka
-            templateSelection: formatState  // Tampilan saat item dipilih
+            templateResult: formatState,
+            templateSelection: formatState
         });
     });
 </script>

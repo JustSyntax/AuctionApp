@@ -42,23 +42,57 @@
         font-weight: 800;
         font-size: 1.1rem;
     }
-    .user-bidder {
-        font-size: 12px;
-        color: #888;
+    
+    /* Search Container Minimalis */
+    .search-container {
+        background: white;
+        padding: 15px;
+        border-radius: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        margin-bottom: 30px;
+        display: flex;
+        justify-content: center; /* Tengahin Search Bar */
+    }
+    .input-search {
+        border-radius: 30px 0 0 30px; /* Rounded kiri */
+        padding: 12px 25px;
+        border: 1px solid #e0e0e0;
         background: #f8f9fa;
-        padding: 5px 10px;
-        border-radius: 8px;
-        display: inline-block;
+        border-right: none;
+    }
+    .input-search:focus {
+        background: #fff;
+        box-shadow: none;
+        border-color: var(--primary);
+    }
+    .btn-search {
+        border-radius: 0 30px 30px 0; /* Rounded kanan */
+        padding-left: 25px;
+        padding-right: 25px;
+        font-weight: 600;
     }
 </style>
 @endpush
 
 @section('content')
 
+{{-- SEARCH BAR SECTION (MINIMALIS) --}}
+<div class="search-container">
+    <form action="{{ route('penawaran.index') }}" method="GET" style="width: 100%; max-width: 600px;">
+        <div class="input-group">
+            <input type="text" name="search" class="form-control input-search" placeholder="Cari mobil yang anda inginkan..." value="{{ request('search') }}">
+            <button class="btn btn-primary btn-search" type="submit">
+                <i class="bi bi-search me-2"></i> Cari
+            </button>
+        </div>
+    </form>
+</div>
+
+
+{{-- GRID CARD --}}
 <div class="row g-4">
     @forelse($lelangs as $lelang)
     <div class="col-md-6 col-lg-4 col-xl-3">
-        {{-- Link pembungkus agar seluruh card bisa diklik --}}
         <a href="{{ route('penawaran.show', $lelang->id_lelang) }}" class="text-decoration-none text-dark">
             <div class="card auction-card shadow-sm">
                 
@@ -105,8 +139,11 @@
     </div>
     @empty
     <div class="col-12 text-center py-5">
-        <div class="mb-3"><i class="bi bi-box-seam text-muted" style="font-size: 50px;"></i></div>
-        <h5 class="text-muted">Belum ada lelang yang dibuka saat ini.</h5>
+        <div class="mb-3"><i class="bi bi-search text-muted" style="font-size: 50px;"></i></div>
+        <h5 class="text-muted">Barang lelang tidak ditemukan.</h5>
+        @if(request('search'))
+            <a href="{{ route('penawaran.index') }}" class="btn btn-outline-primary btn-sm mt-2">Lihat Semua Barang</a>
+        @endif
     </div>
     @endforelse
 </div>

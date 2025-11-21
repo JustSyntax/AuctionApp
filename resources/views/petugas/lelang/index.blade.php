@@ -21,7 +21,7 @@
     /* Kalau DIBUKA -> Klik untuk TUTUP */
     .btn-status.buka { background: rgba(13, 202, 240, 0.15); color: #0dcaf0; border: 1px solid rgba(13, 202, 240, 0.2); }
     .btn-status.buka:hover { background: #0dcaf0; color: white; }
-    .btn-status.buka:hover::after { content: " (TUTUP)"; } /* Teks berubah pas hover */
+    .btn-status.buka:hover::after { content: " (TUTUP)"; } 
     
     /* Kalau DITUTUP -> Klik untuk BUKA */
     .btn-status.tutup { background: rgba(108, 117, 125, 0.15); color: #6c757d; border: 1px solid rgba(108, 117, 125, 0.2); }
@@ -40,6 +40,11 @@
     /* Disabled Delete Style */
     .btn-action.delete[disabled] { opacity: 0.3; cursor: not-allowed; }
     .btn-action.delete[disabled]:hover { background: transparent; color: #ff4d4d; }
+
+    /* Pagination Style */
+    .pagination { margin-bottom: 0; justify-content: end; }
+    .page-item.active .page-link { background-color: #2a53ff; border-color: #2a53ff; }
+    .page-link { color: #2a53ff; }
 </style>
 @endpush
 
@@ -91,7 +96,9 @@
                 <tbody style="font-size: 14px;">
                     @forelse ($lelangs as $index => $lelang)
                     <tr>
-                        <td class="ps-4 text-muted">{{ $index + 1 }}</td>
+                        {{-- Nomor Urut Sesuai Halaman --}}
+                        <td class="ps-4 text-muted">{{ $lelangs->firstItem() + $index }}</td>
+                        
                         <td>
                             <div class="d-flex align-items-center gap-3">
                                 @if($lelang->barang->gambar)
@@ -152,14 +159,13 @@
                                     <i class="bi bi-eye-fill"></i>
                                 </a>
 
-                                {{-- TOMBOL HAPUS (Hanya Aktif Jika BELUM ada pemenang/history) --}}
+                                {{-- TOMBOL HAPUS --}}
                                 @if(!$lelang->pemenang)
                                     <form action="{{ route('lelang.destroy', $lelang->id_lelang) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus data lelang ini?');">
                                         @csrf @method('DELETE')
                                         <button type="submit" class="btn-action delete" title="Hapus"><i class="bi bi-trash-fill"></i></button>
                                     </form>
                                 @else
-                                    {{-- Tombol Mati (Disabled) --}}
                                     <button type="button" class="btn-action delete" disabled title="Tidak bisa dihapus karena sudah ada riwayat penawaran">
                                         <i class="bi bi-trash-fill"></i>
                                     </button>
@@ -176,6 +182,11 @@
                 </tbody>
             </table>
         </div>
+    </div>
+
+    {{-- PAGINATION LINKS --}}
+    <div class="card-footer bg-white py-3">
+        {{ $lelangs->links() }}
     </div>
 </div>
 @endsection

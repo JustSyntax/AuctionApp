@@ -7,6 +7,7 @@ use App\Http\Controllers\MasyarakatController;
 use App\Http\Controllers\PetugasController;
 use App\Http\Controllers\LelangController;
 use App\Http\Controllers\HistoryController; // <-- 1. WAJIB IMPORT INI
+use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\PenawaranController;
 
 /*
@@ -57,4 +58,6 @@ Route::middleware(['auth.adminpetugas'])->group(function () {
     Route::patch('/lelang/{id}/tutup', [LelangController::class, 'update'])->name('lelang.tutup');
     Route::resource('lelang', LelangController::class)->except(['edit', 'update']); // Show diizinkan
 
+    Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
+    Route::get('/laporan/print', [LaporanController::class, 'print'])->name('laporan.print');
 });

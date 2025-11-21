@@ -26,4 +26,8 @@ class Petugas extends Authenticatable
     {
         return $this->belongsTo(Level::class, 'id_level');
     }
+    public function lelang()
+    {
+        return $this->hasMany(Lelang::class, 'id_petugas', 'id_petugas');
+    }
 }

@@ -12,7 +12,8 @@
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label">NIK <span class="text-danger">*</span></label>
-                    <input type="number" name="nik" class="form-control @error('nik') is-invalid @enderror" value="{{ old('nik') }}" required>
+                    <input type="number" name="nik" class="form-control @error('nik') is-invalid @enderror" value="{{ old('nik') }}" oninput="if(this.value.length > 16) this.value = this.value.slice(0, 16);"
+                       onkeypress="return event.charCode >= 48 && event.charCode <= 57" required>
                     @error('nik') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
                 <div class="col-md-6">
@@ -39,7 +40,8 @@
 
                 <div class="col-md-12">
                     <label class="form-label">No. Telepon <span class="text-danger">*</span></label>
-                    <input type="number" name="telp" class="form-control @error('telp') is-invalid @enderror" value="{{ old('telp') }}" required>
+                    <input type="number" name="telp" class="form-control @error('telp') is-invalid @enderror" value="{{ old('telp') }}" oninput="if(this.value.length > 13) this.value = this.value.slice(0, 13);"
+                       onkeypress="return event.charCode >= 48 && event.charCode <= 57" required>
                     @error('telp') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
                 <div class="col-12">

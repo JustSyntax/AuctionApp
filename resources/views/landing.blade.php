@@ -5,9 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Drive Auction</title>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+{{-- 1. GANTI CDN DENGAN FILE LOKAL --}}
+<link href="{{ asset('assets/css/bootstrap.min.css') }}" rel="stylesheet">
+<link href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
+<link href="{{ asset('assets/css/montserrat.css') }}" rel="stylesheet">
 
 <style>
 html { scroll-behavior: smooth; }
@@ -72,6 +73,12 @@ label { font-weight: 500; }
 .text-error {
     color: red; font-size: 13px; display: none; margin-top: -8px; margin-bottom: 8px;
 }
+
+/* Hilangkan panah di input number */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; margin: 0; 
+}
 </style>
 </head>
 
@@ -84,7 +91,8 @@ label { font-weight: 500; }
 <section class="hero">
     <div class="hero-text">DRIVE AUCTION</div>
     <div class="car-container">
-        <img src="assets/image/bcar.png" class="car-img" alt="car">
+        <img src="{{ asset('assets/image/bcar.png') }}" class="car-img" alt="car" onerror="this.style.display='none'"> 
+        {{-- Pastikan gambar bcar.png ada di public/assets/image/ atau ganti path-nya --}}
     </div>
     <div class="road-light"></div>
 </section>
@@ -156,7 +164,10 @@ label { font-weight: 500; }
                 @csrf
 
                 <label>NIK</label>
-                <input type="number" name="nik" class="form-control mb-1" id="nik" value="{{ old('nik') }}" required>
+                <input type="number" name="nik" class="form-control mb-1" id="nik" value="{{ old('nik') }}" 
+                       oninput="if(this.value.length > 16) this.value = this.value.slice(0, 16);"
+                       onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                       required>
                 <div class="text-error" id="nikError" style="display: {{ $errors->has('nik') ? 'block' : 'none' }}">
                     @error('nik') {{ $message }} @else NIK harus 16 digit @enderror
                 </div>
@@ -192,7 +203,10 @@ label { font-weight: 500; }
                 <div class="text-error" id="confirmPasswordError">Password tidak cocok</div>
 
                 <label>No Telp</label>
-                <input type="number" name="telp" class="form-control mb-1" id="telp" value="{{ old('telp') }}" required>
+                <input type="number" name="telp" class="form-control mb-1" id="telp" value="{{ old('telp') }}"
+                       oninput="if(this.value.length > 13) this.value = this.value.slice(0, 13);"
+                       onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                       required>
                 <div class="text-error" id="telpError">No Telp tidak boleh kosong</div>
 
                 <button type="submit" class="btn btn-dark w-100">Register</button>
@@ -210,16 +224,11 @@ label { font-weight: 500; }
 
 <script>
 function resetForms() {
-    // Hapus reset() hardcode agar value old('..') dari Laravel tidak hilang saat reload error
-    // Kita hanya hide error jika user manual pindah tab
-    
-    // 2. Sembunyikan semua pesan error
     const errors = document.querySelectorAll('.text-error');
     errors.forEach(function(el) {
         el.style.display = 'none';
     });
 
-    // Reset type password
     document.getElementById('loginPassword').type = "password";
     document.getElementById('registerPassword').type = "password";
     document.getElementById('confirmPassword').type = "password";
@@ -230,7 +239,7 @@ function resetForms() {
 }
 
 function showRegister(event) {
-    if(event) event.preventDefault(); // Cek if event exist (untuk panggil manual)
+    if(event) event.preventDefault();
     resetForms();
     document.getElementById("formLogin").style.display = "none";
     document.getElementById("formRegister").style.display = "block";
@@ -255,12 +264,9 @@ function togglePassword(id) {
     }
 }
 
-// REGISTER VALIDATION (CLIENT SIDE)
+// REGISTER VALIDATION
 document.getElementById('registerForm').addEventListener('submit', function(e){
-    // Validasi JS untuk format dasar (kosong/panjang)
-    // Validasi Unik tetap dilakukan Server (Laravel) setelah submit
     let valid = true;
-
     const nik = document.getElementById('nik');
     const nama = document.getElementById('nama');
     const username = document.getElementById('username');
@@ -268,21 +274,21 @@ document.getElementById('registerForm').addEventListener('submit', function(e){
     const confirm = document.getElementById('confirmPassword');
     const telp = document.getElementById('telp');
 
-    // Kita hanya cek validasi dasar JS jika input diubah, 
-    // tapi biarkan pesan error dari Laravel tetap tampil jika user belum mengubahnya.
+    document.getElementById('nikError').style.display = 'none';
     
-    // Simple check: Jika kosong, tampilkan error 'wajib diisi'
-    // Note: Ini akan menimpa pesan "Username sudah ada" jika user mengosongkan field lalu submit lagi.
     if(nik.value.trim().length !== 16) {
-        document.getElementById('nikError').textContent = "NIK harus 16 digit";
-        document.getElementById('nikError').style.display = 'block';
+        const nikErr = document.getElementById('nikError');
+        if(nikErr.textContent.trim() === '') nikErr.textContent = "NIK harus 16 digit";
+        else if(!nikErr.textContent.includes('terdaftar')) nikErr.textContent = "NIK harus 16 digit"; 
+        
+        nikErr.style.display = 'block';
         valid = false;
     } 
     if(!nama.value.trim()) {
         document.getElementById('namaError').style.display = 'block'; valid = false;
     }
     if(!username.value.trim()) {
-        document.getElementById('usernameError').textContent = "Username tidak boleh kosong"; // Reset text
+        document.getElementById('usernameError').textContent = "Username tidak boleh kosong";
         document.getElementById('usernameError').style.display = 'block'; valid = false;
     }
     if(password.value.length < 8) {
@@ -299,7 +305,6 @@ document.getElementById('registerForm').addEventListener('submit', function(e){
     if(!valid) e.preventDefault();
 });
 
-// LOGIN VALIDATION
 document.getElementById('loginForm').addEventListener('submit', function(e){
     let valid = true;
     const username = document.getElementById('loginUsername');
@@ -320,10 +325,7 @@ document.getElementById('loginForm').addEventListener('submit', function(e){
     if(!valid) e.preventDefault();
 });
 
-// --- LOGIC SCROLL & ERROR HANDLING DARI SERVER ---
-
 @if(session('login_error'))
-    // Kalo Error Login
     document.addEventListener('DOMContentLoaded', function(){
         const err = "{{ session('login_error') }}";
         
@@ -331,59 +333,43 @@ document.getElementById('loginForm').addEventListener('submit', function(e){
             document.getElementById('loginUsernameError').textContent = "Username / NIK tidak valid";
             document.getElementById('loginUsernameError').style.display = 'block';
         }
-        
         if(err === 'password') {
             document.getElementById('loginPasswordError').textContent = "Password salah";
             document.getElementById('loginPasswordError').style.display = 'block';
         }
-
-        // TAMBAHAN: HANDLING BLOKIR
         if(err === 'blocked') {
-            // Tampilkan error di bawah username atau password (bebas), disini saya taruh di username
             document.getElementById('loginUsernameError').textContent = "Akun Anda telah diblokir. Hubungi Admin.";
             document.getElementById('loginUsernameError').style.display = 'block';
-            
-            // Opsional: disable tombol login atau input
             document.getElementById('loginUsername').classList.add('is-invalid');
         }
 
-        // Pastikan form login muncul
         document.getElementById("formLogin").style.display = "block";
         document.getElementById("formRegister").style.display = "none";
-
         document.getElementById('login').scrollIntoView({ behavior: 'smooth' });
     });
 @endif
 
 @if($errors->any())
-    // Kalo Error Register (Validasi Laravel gagal: NIK Kembar, dll)
     document.addEventListener('DOMContentLoaded', function(){
-        // Otomatis pindah ke tab Register
         document.getElementById("formLogin").style.display = "none";
         document.getElementById("formRegister").style.display = "block";
-        
-        // Scroll ke bawah
         document.getElementById('login').scrollIntoView({ behavior: 'smooth' });
     });
 @endif
 
 @if(session('success'))
     document.addEventListener('DOMContentLoaded', function(){
-        // Reset form dulu biar bersih
         document.getElementById('loginForm').reset();
         document.getElementById('registerForm').reset();
-        
-        // Paksa buka tab Login
         document.getElementById("formLogin").style.display = "block";
         document.getElementById("formRegister").style.display = "none";
-
-        // Scroll otomatis ke section login
         document.getElementById('login').scrollIntoView({ behavior: 'smooth' });
     });
 @endif
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{{-- 2. GANTI JS CDN DENGAN FILE LOKAL --}}
+<script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
 
 </body>
 </html>
